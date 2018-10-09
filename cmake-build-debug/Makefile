@@ -122,6 +122,60 @@ projet/fast:
 	$(MAKE) -f CMakeFiles\projet.dir\build.make CMakeFiles/projet.dir/build
 .PHONY : projet/fast
 
+game.obj: game.c.obj
+
+.PHONY : game.obj
+
+# target to build an object file
+game.c.obj:
+	$(MAKE) -f CMakeFiles\projet.dir\build.make CMakeFiles/projet.dir/game.c.obj
+.PHONY : game.c.obj
+
+game.i: game.c.i
+
+.PHONY : game.i
+
+# target to preprocess a source file
+game.c.i:
+	$(MAKE) -f CMakeFiles\projet.dir\build.make CMakeFiles/projet.dir/game.c.i
+.PHONY : game.c.i
+
+game.s: game.c.s
+
+.PHONY : game.s
+
+# target to generate assembly for a file
+game.c.s:
+	$(MAKE) -f CMakeFiles\projet.dir\build.make CMakeFiles/projet.dir/game.c.s
+.PHONY : game.c.s
+
+game_board.obj: game_board.c.obj
+
+.PHONY : game_board.obj
+
+# target to build an object file
+game_board.c.obj:
+	$(MAKE) -f CMakeFiles\projet.dir\build.make CMakeFiles/projet.dir/game_board.c.obj
+.PHONY : game_board.c.obj
+
+game_board.i: game_board.c.i
+
+.PHONY : game_board.i
+
+# target to preprocess a source file
+game_board.c.i:
+	$(MAKE) -f CMakeFiles\projet.dir\build.make CMakeFiles/projet.dir/game_board.c.i
+.PHONY : game_board.c.i
+
+game_board.s: game_board.c.s
+
+.PHONY : game_board.s
+
+# target to generate assembly for a file
+game_board.c.s:
+	$(MAKE) -f CMakeFiles\projet.dir\build.make CMakeFiles/projet.dir/game_board.c.s
+.PHONY : game_board.c.s
+
 main.obj: main.c.obj
 
 .PHONY : main.obj
@@ -158,6 +212,12 @@ help:
 	@echo ... projet
 	@echo ... edit_cache
 	@echo ... rebuild_cache
+	@echo ... game.obj
+	@echo ... game.i
+	@echo ... game.s
+	@echo ... game_board.obj
+	@echo ... game_board.i
+	@echo ... game_board.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

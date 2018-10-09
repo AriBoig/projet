@@ -6,6 +6,24 @@
 
 #IncludeRegexTransform: 
 
+C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game.c
+stdio.h
+-
+game_board.h
+C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game_board.h
+
+C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game.h
+
+C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game_board.c
+stdio.h
+-
+mem.h
+-
+stdlib.h
+-
+
+C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game_board.h
+
 C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/main.c
 stdio.h
 -
@@ -13,4 +31,8 @@ malloc.h
 -
 mem.h
 -
+game_board.h
+C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game_board.h
+game.h
+C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game.h
 

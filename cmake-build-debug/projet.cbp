@@ -74,6 +74,18 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game.c">
+			<Option target="projet"/>
+		</Unit>
+		<Unit filename="C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game.h">
+			<Option target="projet"/>
+		</Unit>
+		<Unit filename="C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game_board.c">
+			<Option target="projet"/>
+		</Unit>
+		<Unit filename="C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game_board.h">
+			<Option target="projet"/>
+		</Unit>
 		<Unit filename="C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/main.c">
 			<Option target="projet"/>
 		</Unit>

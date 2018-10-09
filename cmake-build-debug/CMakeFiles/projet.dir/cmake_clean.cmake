@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/projet.dir/main.c.obj"
+  "CMakeFiles/projet.dir/game_board.c.obj"
+  "CMakeFiles/projet.dir/game.c.obj"
   "projet.pdb"
   "projet.exe"
   "projet.exe.manifest"
