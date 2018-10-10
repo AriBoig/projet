@@ -19,6 +19,7 @@ typedef struct{
     int col;
 }column_row;
 
+
 void display_game_board(int **game_board, int row, int column){
     for (int i = 0; i < row; ++i) {
         for (int j = 0; j < column; ++j) {
@@ -235,11 +236,12 @@ void destroy_walls(int **gameboard, int row, int column){
     }
 }
 
-void print_game_board(char * name,int ** game_board, int row, int column){
+void print_file_game_board(char * name,int ** game_board, int row, int column){
     name = strcat(name,".cfg");
     FILE * file = fopen(name,"w");
     int count = 0;
     if (file != NULL) {
+        //fprintf(file,"%d*%d\n",row,column);
         for (int i = 0; i < row; ++i) {
             for (int j = 0; j < column; ++j) {
                 if (game_board[i][j] == 0){
@@ -257,7 +259,7 @@ void print_game_board(char * name,int ** game_board, int row, int column){
     }
 }
 
-void create_labyrinthe(int **game_board){
+void create_labyrinthe(int **game_board, column_row *co_row){
     int y;
     int x;
     char * name = (char *) malloc(sizeof(char));
@@ -267,52 +269,73 @@ void create_labyrinthe(int **game_board){
     printf("Veuillez saisir un second nombre IMPAIR qui sera votre longueur : ");
     x = enter_odd();
 
-    column_row co_row;
-    co_row.row = x;
-    co_row.col = y;
+    co_row->col = x;
+    co_row->row = y;
 
-    game_board = calloc(co_row.col,sizeof(int*));
+    game_board = calloc(co_row->row,sizeof(int*));
     for (int i = 0; i < y; ++i) {
-        game_board[i] = calloc(co_row.row,sizeof(int));
+        game_board[i] = calloc(co_row->col,sizeof(int));
     }
-    init_game_board(game_board,co_row.col,co_row.row);
-    display_game_board(game_board,co_row.col,co_row.row);
+    init_game_board(game_board,co_row->row,co_row->col);
+    display_game_board(game_board,co_row->row,co_row->col);
 
-    destroy_walls(game_board,co_row.col,co_row.row);
-    display_game_board(game_board,co_row.col,co_row.row);
+    destroy_walls(game_board,co_row->row,co_row->col);
+    display_game_board(game_board,co_row->row,co_row->col);
 
     printf("Votre labyrinthe a ete cree\nVeuillez saisir un nom a votre labyrinthe : ");
     scanf("%s",name);
-    print_game_board(name,game_board,co_row.col,co_row.row);
+    print_file_game_board(name,game_board,co_row->row,co_row->col);
     free(name);
 }
 
-void load_labyrinthe(int ** game_board){
+void load_labyrinthe(int ** game_board,column_row *col_row){
     char * name = (char*) malloc(sizeof(char));
     FILE * file;
     char * line = (char*) malloc(sizeof(char));
     printf("Veuillez saisir la localisation de votre fichier : ");
     scanf("%s",name);
     file = fopen(name,"r");
-    int y = 0;
-    int x = 0;
+
+    col_row->row = 0;
+    col_row->col = 0;
+    int c;
     if (file != NULL){
-        while (fgetc(file) != NULL){
-            if (fgetc(file)== '#'){
-                game_board[y][x] = 0;
-                x++;
-            }else if (fgetc(file) == ' '){
-                game_board[y][x] = 1;
-                x++;
-            }else if(fgetc(file) == 'o'){
-                game_board[y][x] = -1;
-                x++;
-            }else if(fgetc(file) == '\n'){
-                y++;
+        while((c = fgetc(file))!= EOF){
+            if (c == '\n'){
+                col_row->row++;
+            }else if(col_row->row == 0){
+                col_row->col++;
             }
         }
-        fclose(file);
-    }
+        printf("%d by %d\n",col_row->row,col_row->col);
+        fseek(file,0,0);
 
+        game_board = calloc(col_row->col,sizeof(int*));
+        for (int i = 0; i < col_row->col; ++i) {
+            game_board[i] = calloc(col_row->row,sizeof(int));
+        }
+        int i = 0;
+        int j = 0;
+        while ((c = fgetc(file))!= EOF){
+            if (c == '#'){
+                game_board[i][j] = 0;
+                j++;
+            }else if (c == ' '){
+                game_board[i][j] = 1;
+                j++;
+            }else if(c == 'o'){
+                game_board[i][j] = -1;
+                j++;
+            }else if(c == '\n'){
+                i++;
+                j = 0;
+            }
+        }
+        display_game_board(game_board,col_row->row,col_row->col);
+        fclose(file);
+    }else{
+        printf("Le fichier %s selectionné est introuvable",name);
+    }
+    free(line);
     free(name);
 }

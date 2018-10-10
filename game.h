@@ -2,6 +2,11 @@
 // Created by arist on 08/10/2018.
 //
 
+typedef struct{
+    int pos_column;
+    int pos_row;
+}position_player;
+
 #ifndef PROJET_GAME_H
 #define PROJET_GAME_H
 /**

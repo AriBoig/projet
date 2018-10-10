@@ -9,6 +9,10 @@
 C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game.c
 stdio.h
 -
+ctype.h
+-
+malloc.h
+-
 game_board.h
 C:/Users/arist/Desktop/ENSICAEN/TDprog/projet/game_board.h
 

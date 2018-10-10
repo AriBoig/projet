@@ -2,6 +2,19 @@
 // Created by arist on 08/10/2018.
 //
 
+typedef struct{
+    int north;
+    int east;
+    int south;
+    int west;
+}coordonnees;
+
+typedef struct{
+    int row;
+    int col;
+}column_row;
+
+
 #ifndef PROJET_GAME_BOARD_H
 #define PROJET_GAME_BOARD_H
 /**
@@ -141,13 +154,18 @@ void print_game_board(char * name,int ** game_board, int row, int column);
  * This function create the labyrinthe by calling all others functions
  * @param game_board
  */
-void create_labyrinthe(int **game_board);
+void create_labyrinthe(int ***game_board, column_row *col_row);
 
 /**
- * This function isn't finished yet
+ * This function load a labyrinthe from a file .cfg
  * @param game_board
  */
-void load_labyrinthe(int ** game_board);
+void load_labyrinthe(int ** game_board, column_row *col_row);
+
+int get_row(int **game_board);
+
+int get_column(int **game_board);
+
 
 
 #endif //PROJET_GAME_BOARD_H
