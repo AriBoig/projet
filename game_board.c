@@ -19,18 +19,21 @@ typedef struct{
     int col;
 }column_row;
 
+typedef struct{
+    int **game_board;
+}game_board;
 
-void display_game_board(int **game_board, int row, int column){
-    for (int i = 0; i < row; ++i) {
-        for (int j = 0; j < column; ++j) {
-            if (game_board[i][j] == 0){
+void display_game_board(game_board *g_b, column_row* col_row){
+    for (int i = 0; i < col_row->row; ++i) {
+        for (int j = 0; j < col_row->col; ++j) {
+            if (g_b->game_board[i][j] == 0){
                 printf("#");
-            }else if (game_board[i][j] == 1){
+            }else if (g_b->game_board[i][j] == 1){
                 printf(" ");
-            }else if(game_board[i][j] == -1){
+            }else if(g_b->game_board[i][j] == -1){
                 printf("%c",111);
             }else{
-                printf("%d",game_board[i][j]);
+                printf("%d",g_b->game_board[i][j]);
             }
         }
         printf("\n");
@@ -38,10 +41,10 @@ void display_game_board(int **game_board, int row, int column){
     printf("\n");
 }
 
-void display_game_board_no_filter(int **game_board, int row, int column){
-    for (int i = 0; i < row; ++i) {
-        for (int j = 0; j < column; ++j) {
-            printf("%d",game_board[i][j]);
+void display_game_board_no_filter(game_board *g_b, column_row* col_row){
+    for (int i = 0; i < col_row->row; ++i) {
+        for (int j = 0; j < col_row->col; ++j) {
+            printf("%d",g_b->game_board[i][j]);
         }
         printf("\n");
     }
@@ -59,33 +62,33 @@ int enter_odd(){
     }
 
 }
-void init_game_board(int **game_board, int row, int column){
+void init_game_board(game_board *g_b, column_row* col_row){
     int count = 0;
     int entrance = 1;
-    int exit = row-2;
-    game_board[entrance][0] = -1;
-    game_board[exit][column-1] = 1;
-    for (int i = 1; i < row - 1; i += 2) {
-        for (int j = 1; j < column - 1; j  += 2) {
-            game_board[i][j] = ++count ;
+    int exit = col_row->row-2;
+    g_b->game_board[entrance][0] = -1;
+    g_b->game_board[exit][col_row->col-1] = 1;
+    for (int i = 1; i < col_row->row - 1; i += 2) {
+        for (int j = 1; j < col_row->col - 1; j  += 2) {
+            g_b->game_board[i][j] = ++count ;
         }
     }
 }
-void destroy_game_board(int **game_board){
+void free_game_board(game_board *g_b){
     for (int j = 0; j < sizeof(game_board); ++j) {
-        free(game_board[j]);
+        free(g_b->game_board[j]);
     }
-    free(game_board);
+    free(g_b->game_board);
 }
 
-int fill_rand(int random_y_x, int pos_x, int pos_y,int row, int column){
+int fill_rand(int random_y_x, int pos_x, int pos_y, column_row* col_row){
     coordonnees coor;
     coor.north = 1;
     coor.east = 2;
     coor.south = 3;
     coor.west = 4;
-    int last_empty_case_y = row - 2;
-    int last_empty_case_x = column - 2;
+    int last_empty_case_y = col_row->row - 2;
+    int last_empty_case_x = col_row->col - 2;
     // 1 -> haut
     // 2 -> droite
     // 3 -> bas
@@ -115,10 +118,10 @@ int fill_rand(int random_y_x, int pos_x, int pos_y,int row, int column){
     return random_y_x;
 }
 
-int verify_arrays(int **game_board,int row, int column){
-    for (int i = 1; i <= row - 1; i+= 2) {
-        for (int j = 1; j <= column - 1; j += 2) {
-            if (game_board[i][j] != 1) {
+int verify_arrays(game_board *g_b, column_row* col_row){
+    for (int i = 1; i <= col_row->row - 1; i+= 2) {
+        for (int j = 1; j <= col_row->col - 1; j += 2) {
+            if (g_b->game_board[i][j] != 1) {
                 return 0;
             }
         }
@@ -126,11 +129,11 @@ int verify_arrays(int **game_board,int row, int column){
     return 1;
 }
 
-void change_valeur(int **gameboard,int val, int replace, int row, int column){
-    for (int i = 1; i < row - 1; i++) {
-        for (int j = 1; j < column - 1; j ++) {
-            if (gameboard[i][j] == val) {
-                gameboard[i][j] = replace;
+void change_valeur(game_board *g_b,int val, int replace, column_row* col_row){
+    for (int i = 1; i < col_row->row - 1; i++) {
+        for (int j = 1; j < col_row->col - 1; j ++) {
+            if (g_b->game_board[i][j] == val) {
+                g_b->game_board[i][j] = replace;
             }
         }
     }
@@ -164,45 +167,45 @@ void false_random(int taille, int random[]){
     }
 }
 
-void test_destroy_y(int random_y_x,int ** gameboard,int pos_y, int pos_x,int fact, int row, int column){
+void test_destroy_y(int random_y_x,game_board *g_b,int pos_y, int pos_x,int fact, column_row* col_row){
     int temp;
-    if(gameboard[pos_y][pos_x] != gameboard[fact][pos_x]){
-        if(gameboard[pos_y][pos_x] < gameboard[fact][pos_x]){
-            temp = gameboard[pos_y][pos_x];
-            change_valeur(gameboard,gameboard[fact][pos_x],gameboard[pos_y][pos_x],row,column);
+    if(g_b->game_board[pos_y][pos_x] != g_b->game_board[fact][pos_x]){
+        if(g_b->game_board[pos_y][pos_x] < g_b->game_board[fact][pos_x]){
+            temp = g_b->game_board[pos_y][pos_x];
+            change_valeur(g_b,g_b->game_board[fact][pos_x],g_b->game_board[pos_y][pos_x],col_row);
         }else{
-            temp = gameboard[fact][pos_x];
-            change_valeur(gameboard,gameboard[pos_y][pos_x],gameboard[fact][pos_x],row,column);
+            temp = g_b->game_board[fact][pos_x];
+            change_valeur(g_b,g_b->game_board[pos_y][pos_x],g_b->game_board[fact][pos_x],col_row);
         }
-        if (random_y_x == 1) {
-            gameboard[pos_y-1][pos_x] = temp;
-        }else{
-            gameboard[pos_y+1][pos_x] = temp;
+        if (random_y_x == 1) { // top
+            g_b->game_board[pos_y-1][pos_x] = temp;
+        }else{ // bot
+            g_b->game_board[pos_y+1][pos_x] = temp;
         }
     }
 }
 
-void test_destroy_x(int random_y_x,int ** gameboard,int pos_y, int pos_x, int fact, int row, int column){
+void test_destroy_x(int random_y_x,game_board *g_b,int pos_y, int pos_x, int fact, column_row* col_row){
     int temp;
-    if(gameboard[pos_y][pos_x] != gameboard[pos_y][fact]){
-        if(gameboard[pos_y][pos_x] < gameboard[pos_y][fact]){
-            temp = gameboard[pos_y][pos_x];
-            change_valeur(gameboard,gameboard[pos_y][fact],gameboard[pos_y][pos_x],row,column);
+    if(g_b->game_board[pos_y][pos_x] != g_b->game_board[pos_y][fact]){
+        if(g_b->game_board[pos_y][pos_x] < g_b->game_board[pos_y][fact]){
+            temp = g_b->game_board[pos_y][pos_x];
+            change_valeur(g_b,g_b->game_board[pos_y][fact],g_b->game_board[pos_y][pos_x],col_row);
         }else{
-            temp = gameboard[pos_y][fact];
-            change_valeur(gameboard,gameboard[pos_y][pos_x],gameboard[pos_y][fact],row,column);
+            temp = g_b->game_board[pos_y][fact];
+            change_valeur(g_b,g_b->game_board[pos_y][pos_x],g_b->game_board[pos_y][fact],col_row);
         }
-        if (random_y_x == 4) {
-            gameboard[pos_y][pos_x-1] = temp;
-        }else{
-            gameboard[pos_y][pos_x+1] = temp;
+        if (random_y_x == 4) { // left
+            g_b->game_board[pos_y][pos_x-1] = temp;
+        }else{ // right
+            g_b->game_board[pos_y][pos_x+1] = temp;
         }
     }
 }
 
-void destroy_walls(int **gameboard, int row, int column){
+void destroy_walls(game_board *g_b, column_row* col_row){
     int random;
-    int empty_cases = ((row-1)*(column-1))/4;
+    int empty_cases = ((col_row->row-1)*(col_row->col-1))/4;
     // 1 -> haut
     // 2 -> droite
     // 3 -> bas
@@ -214,41 +217,41 @@ void destroy_walls(int **gameboard, int row, int column){
     while(flag == 0){
         random = rand_a_b(1,empty_cases);
         count = 0;
-        for (i = 1; i < row-1; i+= 2) {
-            for (int j = 1; j < column-1; j+= 2) {
+        for (i = 1; i < col_row->row-1; i+= 2) {
+            for (int j = 1; j < col_row->col-1; j+= 2) {
                 count++;
                 if(random == count){
                     random_y_x = rand()%4+1; // générateur de random sur une plage de 1 à 4
-                    random_y_x = fill_rand(random_y_x,i,j,row,column);
+                    random_y_x = fill_rand(random_y_x,i,j,col_row);
                     if (random_y_x == 1){ //suppression du mur du haut
-                        test_destroy_y(random_y_x,gameboard,i,j,i-2,row,column);
+                        test_destroy_y(random_y_x,g_b,i,j,i-2,col_row);
                     }else if (random_y_x == 2){ //suppression du mur de droite
-                        test_destroy_x(random_y_x,gameboard,i,j,j+2,row,column);
+                        test_destroy_x(random_y_x,g_b,i,j,j+2,col_row);
                     }else if(random_y_x == 3) { //suppression du mur du bas
-                        test_destroy_y(random_y_x,gameboard,i,j,i+2,row,column);
+                        test_destroy_y(random_y_x,g_b,i,j,i+2,col_row);
                     }else if (random_y_x == 4){ //suppression du mur de gauche
-                        test_destroy_x(random_y_x,gameboard,i,j,j-2,row,column);
+                        test_destroy_x(random_y_x,g_b,i,j,j-2,col_row);
                     }
                 }
             }
         }
-        flag = verify_arrays(gameboard,row,column);
+        flag = verify_arrays(g_b,col_row);
     }
 }
 
-void print_file_game_board(char * name,int ** game_board, int row, int column){
+void print_file_game_board(char * name,game_board *g_b, column_row* col_row){
     name = strcat(name,".cfg");
     FILE * file = fopen(name,"w");
     int count = 0;
     if (file != NULL) {
-        //fprintf(file,"%d*%d\n",row,column);
-        for (int i = 0; i < row; ++i) {
-            for (int j = 0; j < column; ++j) {
-                if (game_board[i][j] == 0){
+        //fprintf(file,"%d*%d\n",row,col);
+        for (int i = 0; i < col_row->row; ++i) {
+            for (int j = 0; j < col_row->col; ++j) {
+                if (g_b->game_board[i][j] == 0){
                     fputc('#',file);
-                }else if (game_board[i][j] == 1){
+                }else if (g_b->game_board[i][j] == 1){
                     fputc(' ',file);
-                }else if(game_board[i][j] == -1){
+                }else if(g_b->game_board[i][j] == -1){
                     fputc('o',file);
                 }
                 count++;
@@ -259,7 +262,7 @@ void print_file_game_board(char * name,int ** game_board, int row, int column){
     }
 }
 
-void create_labyrinthe(int **game_board, column_row *co_row){
+void create_labyrinthe(game_board *g_b, column_row *col_row){
     int y;
     int x;
     char * name = (char *) malloc(sizeof(char));
@@ -269,26 +272,26 @@ void create_labyrinthe(int **game_board, column_row *co_row){
     printf("Veuillez saisir un second nombre IMPAIR qui sera votre longueur : ");
     x = enter_odd();
 
-    co_row->col = x;
-    co_row->row = y;
+    col_row->col = x;
+    col_row->row = y;
 
-    game_board = calloc(co_row->row,sizeof(int*));
+    g_b->game_board = calloc(col_row->row,sizeof(int*));
     for (int i = 0; i < y; ++i) {
-        game_board[i] = calloc(co_row->col,sizeof(int));
+        g_b->game_board[i] = calloc(col_row->col,sizeof(int));
     }
-    init_game_board(game_board,co_row->row,co_row->col);
-    display_game_board(game_board,co_row->row,co_row->col);
+    init_game_board(g_b,col_row);
+    display_game_board(g_b,col_row);
 
-    destroy_walls(game_board,co_row->row,co_row->col);
-    display_game_board(game_board,co_row->row,co_row->col);
+    destroy_walls(g_b,col_row);
+    display_game_board(g_b,col_row);
 
     printf("Votre labyrinthe a ete cree\nVeuillez saisir un nom a votre labyrinthe : ");
     scanf("%s",name);
-    print_file_game_board(name,game_board,co_row->row,co_row->col);
+    print_file_game_board(name,g_b,col_row);
     free(name);
 }
 
-void load_labyrinthe(int ** game_board,column_row *col_row){
+void load_labyrinthe(game_board *g_b,column_row *col_row){
     char * name = (char*) malloc(sizeof(char));
     FILE * file;
     char * line = (char*) malloc(sizeof(char));
@@ -310,28 +313,28 @@ void load_labyrinthe(int ** game_board,column_row *col_row){
         printf("%d by %d\n",col_row->row,col_row->col);
         fseek(file,0,0);
 
-        game_board = calloc(col_row->col,sizeof(int*));
+        g_b->game_board = calloc(col_row->col,sizeof(int*));
         for (int i = 0; i < col_row->col; ++i) {
-            game_board[i] = calloc(col_row->row,sizeof(int));
+            g_b->game_board[i] = calloc(col_row->row,sizeof(int));
         }
         int i = 0;
         int j = 0;
         while ((c = fgetc(file))!= EOF){
             if (c == '#'){
-                game_board[i][j] = 0;
+                g_b->game_board[i][j] = 0;
                 j++;
             }else if (c == ' '){
-                game_board[i][j] = 1;
+                g_b->game_board[i][j] = 1;
                 j++;
             }else if(c == 'o'){
-                game_board[i][j] = -1;
+                g_b->game_board[i][j] = -1;
                 j++;
             }else if(c == '\n'){
                 i++;
                 j = 0;
             }
         }
-        display_game_board(game_board,col_row->row,col_row->col);
+        display_game_board(g_b,col_row);
         fclose(file);
     }else{
         printf("Le fichier %s selectionné est introuvable",name);
