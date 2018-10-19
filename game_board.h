@@ -16,6 +16,7 @@ typedef struct{
 
 typedef struct{
     int **game_board;
+    char *name;
 }game_board;
 
 #ifndef PROJET_GAME_BOARD_H
@@ -137,11 +138,10 @@ void destroy_walls(game_board *g_b, column_row *col_row);
 
 /**
  * This function is writing into a file the actual gameboard
- * @param name the value the user will set to his labyrinthe
  * @param g_b
  * @param col_row structure of columns and rows of the game board
  */
-void print_game_board(char * name,game_board *g_b, column_row *col_row);
+void print_game_board(game_board *g_b, column_row *col_row);
 
 /**
  * This function create the labyrinthe by calling all others functions
@@ -154,6 +154,13 @@ void create_labyrinthe(game_board *g_b, column_row *col_row);
  * @param g_b
  */
 void load_labyrinthe(game_board *g_b, column_row *col_row);
+
+/**
+ *
+ * @param g_b
+ * @param col_row
+ */
+void add_trap_and_treasure(game_board *g_b,column_row *col_row);
 
 
 

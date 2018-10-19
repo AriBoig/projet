@@ -21,6 +21,7 @@ typedef struct{
 
 typedef struct{
     int **game_board;
+    char * name;
 }game_board;
 
 void display_game_board(game_board *g_b, column_row* col_row){
@@ -32,7 +33,12 @@ void display_game_board(game_board *g_b, column_row* col_row){
                 printf(" ");
             }else if(g_b->game_board[i][j] == -1){
                 printf("%c",111);
-            }else{
+            }else if(g_b->game_board[i][j] == -2){
+                printf("+");
+            }else if(g_b->game_board[i][j] == -3){
+                printf("X");
+            }
+            else{
                 printf("%d",g_b->game_board[i][j]);
             }
         }
@@ -79,6 +85,7 @@ void free_game_board(game_board *g_b){
         free(g_b->game_board[j]);
     }
     free(g_b->game_board);
+    free(g_b->name);
 }
 
 int fill_rand(int random_y_x, int pos_x, int pos_y, column_row* col_row){
@@ -239,9 +246,9 @@ void destroy_walls(game_board *g_b, column_row* col_row){
     }
 }
 
-void print_file_game_board(char * name,game_board *g_b, column_row* col_row){
-    name = strcat(name,".cfg");
-    FILE * file = fopen(name,"w");
+void print_file_game_board(game_board *g_b, column_row* col_row){
+    g_b->name = strcat(g_b->name,".cfg");
+    FILE * file = fopen(g_b->name,"w");
     int count = 0;
     if (file != NULL) {
         //fprintf(file,"%d*%d\n",row,col);
@@ -253,6 +260,10 @@ void print_file_game_board(char * name,game_board *g_b, column_row* col_row){
                     fputc(' ',file);
                 }else if(g_b->game_board[i][j] == -1){
                     fputc('o',file);
+                }else if(g_b->game_board[i][j] == -2){
+                    fputc('+',file);
+                }else if(g_b->game_board[i][j] == -3){
+                    fputc('X',file);
                 }
                 count++;
             }
@@ -262,10 +273,34 @@ void print_file_game_board(char * name,game_board *g_b, column_row* col_row){
     }
 }
 
+
+void add_trap_and_treasure(game_board *g_b,column_row *col_row){
+    int number_trap_and_treasuer = (col_row->row*col_row->col)/30;
+    if (number_trap_and_treasuer != 0) {
+        int random_case_row;
+        int random_case_col;
+        int flag;
+        for (int i = 1; i <= number_trap_and_treasuer; ++i) {
+            flag = 0;
+            while (flag == 0) {
+                random_case_row = rand_a_b(1, col_row->row - 1);
+                random_case_col = rand_a_b(1, col_row->col - 1);
+                if (g_b->game_board[random_case_row][random_case_col] == 1) {
+                    if (i%2 == 0) {
+                        g_b->game_board[random_case_row][random_case_col] = -2;
+                    }else{
+                        g_b->game_board[random_case_row][random_case_col] = -3;
+                    }
+                    flag = 1;
+                }
+            }
+        }
+    }
+}
+
 void create_labyrinthe(game_board *g_b, column_row *col_row){
     int y;
     int x;
-    char * name = (char *) malloc(sizeof(char));
     printf("Vous avez selectionne la creation de tableau.\n");
     printf("Veuillez saisir un premier nombre IMPAIR qui sera votre hauteur : ");
     y = enter_odd();
@@ -283,21 +318,21 @@ void create_labyrinthe(game_board *g_b, column_row *col_row){
     display_game_board(g_b,col_row);
 
     destroy_walls(g_b,col_row);
-    display_game_board(g_b,col_row);
+    add_trap_and_treasure(g_b,col_row);
 
+    display_game_board(g_b,col_row);
     printf("Votre labyrinthe a ete cree\nVeuillez saisir un nom a votre labyrinthe : ");
-    scanf("%s",name);
-    print_file_game_board(name,g_b,col_row);
-    free(name);
+    scanf("%s",g_b->name);
+    printf("dafuq?");
+    print_file_game_board(g_b,col_row);
 }
 
 void load_labyrinthe(game_board *g_b,column_row *col_row){
-    char * name = (char*) malloc(sizeof(char));
     FILE * file;
     char * line = (char*) malloc(sizeof(char));
     printf("Veuillez saisir la localisation de votre fichier : ");
-    scanf("%s",name);
-    file = fopen(name,"r");
+    scanf("%s",g_b->name);
+    file = fopen(g_b->name,"r");
 
     col_row->row = 0;
     col_row->col = 0;
@@ -313,9 +348,9 @@ void load_labyrinthe(game_board *g_b,column_row *col_row){
         printf("%d by %d\n",col_row->row,col_row->col);
         fseek(file,0,0);
 
-        g_b->game_board = calloc(col_row->col,sizeof(int*));
+        g_b->game_board = calloc(col_row->row,sizeof(int*));
         for (int i = 0; i < col_row->col; ++i) {
-            g_b->game_board[i] = calloc(col_row->row,sizeof(int));
+            g_b->game_board[i] = calloc(col_row->col,sizeof(int));
         }
         int i = 0;
         int j = 0;
@@ -329,7 +364,14 @@ void load_labyrinthe(game_board *g_b,column_row *col_row){
             }else if(c == 'o'){
                 g_b->game_board[i][j] = -1;
                 j++;
-            }else if(c == '\n'){
+            }else if(c == '+') {
+                g_b->game_board[i][j] = -2;
+                j++;
+            }else if(c == 'X'){
+                g_b->game_board[i][j] = -3;
+                j++;
+            }
+            else if(c == '\n'){
                 i++;
                 j = 0;
             }
@@ -337,8 +379,7 @@ void load_labyrinthe(game_board *g_b,column_row *col_row){
         display_game_board(g_b,col_row);
         fclose(file);
     }else{
-        printf("Le fichier %s selectionné est introuvable",name);
+        printf("Le fichier %s selectionné est introuvable",g_b->name);
     }
     free(line);
-    free(name);
 }
