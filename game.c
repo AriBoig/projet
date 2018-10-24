@@ -330,9 +330,13 @@ void game_menu() {
                 game_in = 1;
             }
         } else {
+            if (game_in == 1){
+                free_game_board(&g_b);
+            }else{
+                free(g_b.name);
+            }
             flag = 1;
         }
     }
-    free_game_board(&g_b);
 }
 
