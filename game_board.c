@@ -1,44 +1,48 @@
-//
-// Created by arist on 08/10/2018.
-//
+/**
+* ENSICAEN
+* 6 Boulevard Maréchal Juin
+* F-14050 Caen Cedex
+*
+* This file is owned by ENSICAEN students. No portion of this
+* document may be reproduced, copied or revised without written
+* permission of the authors.
+*/
 
 
-#include <stdio.h>
-#include <mem.h>
-#include <stdlib.h>
+/**
+* @author Aristide Boisgontier <aboisgontier@ecole.ensicaen.fr>
+* @version 0.0.1 - 2018-10-22
+*
+* @todo nothing else.
+* @bug no bugs known.
+*/
 
-typedef struct{
-    int north;
-    int east;
-    int south;
-    int west;
-}coordonnees;
 
-typedef struct{
-    int row;
-    int col;
-}column_row;
+/**
+* @file game_board.c
+* All the functions for the creation of the labyrinth
+*/
 
-typedef struct{
-    int **game_board;
-    char * name;
-}game_board;
+#include "game_board.h"
 
-void display_game_board(game_board *g_b, column_row* col_row){
-    for (int i = 0; i < col_row->row; ++i) {
-        for (int j = 0; j < col_row->col; ++j) {
-            if (g_b->game_board[i][j] == 0){
+/**
+ * This function permit to display the game board with filter
+ * @param g_b the pointer array multidimentional
+ */
+void display_game_board(game_board *g_b) {
+    for (int i = 0; i < g_b->row; ++i) {
+        for (int j = 0; j < g_b->col; ++j) {
+            if (g_b->game_board[i][j] == WALL) {
                 printf("#");
-            }else if (g_b->game_board[i][j] == 1){
+            } else if (g_b->game_board[i][j] == BLANK) {
                 printf(" ");
-            }else if(g_b->game_board[i][j] == -1){
+            } else if(g_b->game_board[i][j] == PLAYER) {
                 printf("%c",111);
-            }else if(g_b->game_board[i][j] == -2){
+            } else if(g_b->game_board[i][j] == BONUS) {
                 printf("+");
-            }else if(g_b->game_board[i][j] == -3){
+            } else if(g_b->game_board[i][j] == MALUS) {
                 printf("X");
-            }
-            else{
+            } else {
                 printf("%d",g_b->game_board[i][j]);
             }
         }
@@ -47,9 +51,13 @@ void display_game_board(game_board *g_b, column_row* col_row){
     printf("\n");
 }
 
-void display_game_board_no_filter(game_board *g_b, column_row* col_row){
-    for (int i = 0; i < col_row->row; ++i) {
-        for (int j = 0; j < col_row->col; ++j) {
+/**
+ * (UNUSED)This function permit to display the game board with filter
+ * @param g_b the pointer array multidimentional
+ */
+void display_game_board_no_filter(game_board *g_b) {
+    for (int i = 0; i < g_b->row; ++i) {
+        for (int j = 0; j < g_b->col; ++j) {
             printf("%d",g_b->game_board[i][j]);
         }
         printf("\n");
@@ -57,77 +65,102 @@ void display_game_board_no_filter(game_board *g_b, column_row* col_row){
     printf("\n");
 }
 
-int enter_odd(){
+/**
+ * This function return an odd. If the user enter anything else it recursively call itself
+ * @return
+ */
+int enter_odd() {
     int number;
     scanf("%d",&number);
-    if(number%2 == 0 || number <= 0){
-        printf("Saisie fausse votre chiffre n'est pas impair\n");
-        number = enter_odd();
-    }else{
-        return number;
+    if (number%2 == 0 || number <= 0) {
+        number++;
+        printf("Wrong enter, isn't odd so I filled +1 to your number : %d\n",number);
     }
+    return number;
 
 }
-void init_game_board(game_board *g_b, column_row* col_row){
-    int count = 0;
+
+/**
+ * This function initiate the position of the player and the exit of the game board
+ * @param g_b the structure of the game board which will be changed
+ */
+void init_entrance_exit(game_board *g_b) {
     int entrance = 1;
-    int exit = col_row->row-2;
-    g_b->game_board[entrance][0] = -1;
-    g_b->game_board[exit][col_row->col-1] = 1;
-    for (int i = 1; i < col_row->row - 1; i += 2) {
-        for (int j = 1; j < col_row->col - 1; j  += 2) {
+    int exit = g_b->row-2;
+    g_b->game_board[entrance][0] = PLAYER;
+    g_b->game_board[exit][g_b->col-1] = BLANK;
+}
+
+/**
+ * This function initialize the game board with a 0 for a '#', 1 for a " " and 'o' for -1
+ * Thanks to this configuration I will not have to handle the last occurence because the last will leave only 1 and 0
+ * @param g_b the structure of the game board
+ */
+void init_game_board(game_board *g_b) {
+    int count = 0;
+    init_entrance_exit(g_b);
+    for (int i = 1; i < g_b->row - 1; i += 2) {
+        for (int j = 1; j < g_b->col - 1; j  += 2) {
             g_b->game_board[i][j] = ++count ;
         }
     }
 }
-void free_game_board(game_board *g_b){
-    for (int j = 0; j < sizeof(game_board); ++j) {
+
+/**
+ * This function free the data used from the game board
+ * @param g_b the structure of the game board
+ */
+void free_game_board(game_board *g_b) {
+    for (int j = 1; j < g_b->row; ++j) {
         free(g_b->game_board[j]);
     }
     free(g_b->game_board);
     free(g_b->name);
 }
 
-int fill_rand(int random_y_x, int pos_x, int pos_y, column_row* col_row){
-    coordonnees coor;
-    coor.north = 1;
-    coor.east = 2;
-    coor.south = 3;
-    coor.west = 4;
-    int last_empty_case_y = col_row->row - 2;
-    int last_empty_case_x = col_row->col - 2;
-    // 1 -> haut
-    // 2 -> droite
-    // 3 -> bas
-    // 4 -> gauche
-    // Pour le bas
+/**
+ * This function look if the random is correctly set. For exemple if I am at the case of the array where I am at the
+ * bottom right corner and the random is set to the right. With this function it will bet set to tbe right
+ * @param random_y_x the random number to verify
+ * @param pos_x position in the array of x
+ * @param pos_y position in the array of y
+ * @return the final number "randomly" selected
+ */
+int fill_rand(int random_y_x, int pos_x, int pos_y, game_board * g_b) {
+    int last_empty_case_y = g_b->row - 2;
+    int last_empty_case_x = g_b->col - 2;
     if(pos_x == last_empty_case_y) {
-        if (random_y_x == coor.south){ // gestion pour le bas et bas/gauche et bas/droite
+        if (random_y_x == SOUTH) {
             random_y_x -= 2;
-        }else if (pos_y == 1 && random_y_x == coor.west){
+        } else if (pos_y == 1 && random_y_x == WEST) {
             random_y_x -= 2;
-        }else if(pos_y == last_empty_case_x && random_y_x == coor.east){
+        } else if (pos_y == last_empty_case_x && random_y_x == EAST) {
             random_y_x += 2;
         }
-    }else if (pos_x == 1) { // gestion pour le haut et haut/gauche et haut/droite
-        if (random_y_x == coor.north){
+    } else if (pos_x == 1) {
+        if (random_y_x == NORTH) {
             random_y_x += 2;
-        }else if(pos_y == 1 && random_y_x == coor.west){
+        } else if (pos_y == 1 && random_y_x == WEST) {
             random_y_x -=2;
-        }else if(pos_y == last_empty_case_x && random_y_x == coor.east){
+        } else if (pos_y == last_empty_case_x && random_y_x == EAST) {
             random_y_x += 2;
         }
-    }else if (pos_y == 1 && random_y_x == coor.west){ // gestion pour la gauche
+    } else if (pos_y == 1 && random_y_x == WEST) {
         random_y_x -= 2;
-    }else if(pos_y == last_empty_case_x && random_y_x == coor.east){ // gestion pour la droite
+    } else if (pos_y == last_empty_case_x && random_y_x == EAST) {
         random_y_x += 2;
     }
     return random_y_x;
 }
 
-int verify_arrays(game_board *g_b, column_row* col_row){
-    for (int i = 1; i <= col_row->row - 1; i+= 2) {
-        for (int j = 1; j <= col_row->col - 1; j += 2) {
+/**
+ * This function verify if the labyrinthe is finished or not by verifying all the array is set to 1 ot not
+ * @param g_b the structure of the game board
+ * @return 0 if false 1 if true
+ */
+int verify_arrays(game_board *g_b) {
+    for (int i = 1; i <= g_b->row - 1; i+= 2) {
+        for (int j = 1; j <= g_b->col - 1; j += 2) {
             if (g_b->game_board[i][j] != 1) {
                 return 0;
             }
@@ -136,9 +169,16 @@ int verify_arrays(game_board *g_b, column_row* col_row){
     return 1;
 }
 
-void change_valeur(game_board *g_b,int val, int replace, column_row* col_row){
-    for (int i = 1; i < col_row->row - 1; i++) {
-        for (int j = 1; j < col_row->col - 1; j ++) {
+/**
+ * This function is looking into the array all the variable which correspond for changing all the values needing to
+ * change
+ * @param g_b the structure of the game board
+ * @param val the value we are searching in the array
+ * @param replace the value with which we are replacing
+ */
+void change_valeur(game_board *g_b,int val, int replace) {
+    for (int i = 1; i < g_b->row - 1; i++) {
+        for (int j = 1; j < g_b->col - 1; j ++) {
             if (g_b->game_board[i][j] == val) {
                 g_b->game_board[i][j] = replace;
             }
@@ -146,7 +186,13 @@ void change_valeur(game_board *g_b,int val, int replace, column_row* col_row){
     }
 }
 
-int verif_random(int random[],int seek){
+/**
+ * This function is looking if the random number exist or not in the array random
+ * @param random the array
+ * @param seek the value we are searching in the array
+ * @return 0 if a value match, 1 otherwise
+ */
+int verif_random(int random[],int seek) {
     for (int i = 0; i < sizeof(random); ++i) {
         if (random[i] == seek) {
             return 0;
@@ -155,18 +201,29 @@ int verif_random(int random[],int seek){
     return 1;
 }
 
-int rand_a_b(int a, int b){
+/**
+ * This function permit to set a random number between a and b included
+ * @param a the 1st number we are setting the min
+ * @param b the 2nd number we are setting the max
+ * @return a random number between a and b
+ */
+int rand_a_b(int a, int b) {
     return rand()%(b-a)+a;
 }
 
-void false_random(int taille, int random[]){
-    int n = taille*2-3;
+/**
+ * This function is unused
+ * @param height the the array to test
+ * @param random the number random to test
+ */
+void false_random(int height, int random[]) {
+    int n = height*2-3;
     int temp;
     for (int i = 0; i < n; ++i) {
         int flag = 0;
-        while(flag != 1) {
+        while (flag != 1) {
             temp = rand_a_b(1,44);
-            if (verif_random(random,temp) == 1){
+            if (verif_random(random,temp) == 1) {
                 flag = 1;
                 random[i] = temp;
             }
@@ -174,95 +231,118 @@ void false_random(int taille, int random[]){
     }
 }
 
-void test_destroy_y(int random_y_x,game_board *g_b,int pos_y, int pos_x,int fact, column_row* col_row){
+/**
+ * This function destroy the wall between a case of the array and another case on the row position
+ * @param random_y_x the number random choosen by random for joining to cases
+ * @param g_b the structure of the game board
+ * @param pos_y the position of the current case of the array we are looking at on row
+ * @param pos_x the position of the current case of the array we are looking at on column
+ * @param fact This value depends on if it has to destroy the wall from top or from bottom
+ */
+void test_destroy_y(int random_y_x,game_board *g_b,int pos_y, int pos_x,int fact) {
     int temp;
-    if(g_b->game_board[pos_y][pos_x] != g_b->game_board[fact][pos_x]){
-        if(g_b->game_board[pos_y][pos_x] < g_b->game_board[fact][pos_x]){
+    if (g_b->game_board[pos_y][pos_x] != g_b->game_board[fact][pos_x]) {
+        if (g_b->game_board[pos_y][pos_x] < g_b->game_board[fact][pos_x]) {
             temp = g_b->game_board[pos_y][pos_x];
-            change_valeur(g_b,g_b->game_board[fact][pos_x],g_b->game_board[pos_y][pos_x],col_row);
-        }else{
+            change_valeur(g_b,g_b->game_board[fact][pos_x],g_b->game_board[pos_y][pos_x]);
+        } else {
             temp = g_b->game_board[fact][pos_x];
-            change_valeur(g_b,g_b->game_board[pos_y][pos_x],g_b->game_board[fact][pos_x],col_row);
+            change_valeur(g_b,g_b->game_board[pos_y][pos_x],g_b->game_board[fact][pos_x]);
         }
-        if (random_y_x == 1) { // top
+        if (random_y_x == 1) {
             g_b->game_board[pos_y-1][pos_x] = temp;
-        }else{ // bot
+        } else {
             g_b->game_board[pos_y+1][pos_x] = temp;
         }
     }
 }
 
-void test_destroy_x(int random_y_x,game_board *g_b,int pos_y, int pos_x, int fact, column_row* col_row){
+/**
+ * This function destroy the wall between a case of the array and another case on the column position
+ * @param random_y_x the number random chosen by random for joining to cases
+ * @param g_b the structure of the game board
+ * @param pos_y the position of the current case of the array we are looking at on row
+ * @param pos_x the position of the current case of the array we are looking at on column
+ * @param fact This value depends on if it has to destroy the wall from the right or the left
+ */
+void test_destroy_x(int random_y_x,game_board *g_b,int pos_y, int pos_x, int fact) {
     int temp;
-    if(g_b->game_board[pos_y][pos_x] != g_b->game_board[pos_y][fact]){
-        if(g_b->game_board[pos_y][pos_x] < g_b->game_board[pos_y][fact]){
+    if (g_b->game_board[pos_y][pos_x] != g_b->game_board[pos_y][fact]) {
+        if (g_b->game_board[pos_y][pos_x] < g_b->game_board[pos_y][fact]) {
             temp = g_b->game_board[pos_y][pos_x];
-            change_valeur(g_b,g_b->game_board[pos_y][fact],g_b->game_board[pos_y][pos_x],col_row);
-        }else{
+            change_valeur(g_b,g_b->game_board[pos_y][fact],g_b->game_board[pos_y][pos_x]);
+        } else {
             temp = g_b->game_board[pos_y][fact];
-            change_valeur(g_b,g_b->game_board[pos_y][pos_x],g_b->game_board[pos_y][fact],col_row);
+            change_valeur(g_b,g_b->game_board[pos_y][pos_x],g_b->game_board[pos_y][fact]);
         }
-        if (random_y_x == 4) { // left
+        if (random_y_x == 4) {
             g_b->game_board[pos_y][pos_x-1] = temp;
-        }else{ // right
+        } else {
             g_b->game_board[pos_y][pos_x+1] = temp;
         }
     }
 }
 
-void destroy_walls(game_board *g_b, column_row* col_row){
+/**
+ * This function is destroying all the wall of the labyrinth to generate the perfect labyrinth
+ * @param g_b the structure of the game board
+ */
+void destroy_walls(game_board *g_b) {
     int random;
-    int empty_cases = ((col_row->row-1)*(col_row->col-1))/4;
-    // 1 -> haut
-    // 2 -> droite
-    // 3 -> bas
-    // 4 -> gauche
+    int empty_cases = ((g_b->row-1)*(g_b->col-1))/4;
     int random_y_x;
     int flag = 0;
     int count;
     int i;
-    while(flag == 0){
+    while(flag == 0) {
         random = rand_a_b(1,empty_cases);
         count = 0;
-        for (i = 1; i < col_row->row-1; i+= 2) {
-            for (int j = 1; j < col_row->col-1; j+= 2) {
+        for (i = 1; i < g_b->row-1; i+= 2) {
+            for (int j = 1; j < g_b->col-1; j+= 2) {
                 count++;
-                if(random == count){
-                    random_y_x = rand()%4+1; // générateur de random sur une plage de 1 à 4
-                    random_y_x = fill_rand(random_y_x,i,j,col_row);
-                    if (random_y_x == 1){ //suppression du mur du haut
-                        test_destroy_y(random_y_x,g_b,i,j,i-2,col_row);
-                    }else if (random_y_x == 2){ //suppression du mur de droite
-                        test_destroy_x(random_y_x,g_b,i,j,j+2,col_row);
-                    }else if(random_y_x == 3) { //suppression du mur du bas
-                        test_destroy_y(random_y_x,g_b,i,j,i+2,col_row);
-                    }else if (random_y_x == 4){ //suppression du mur de gauche
-                        test_destroy_x(random_y_x,g_b,i,j,j-2,col_row);
+                if (random == count) {
+                    random_y_x = rand_a_b(1,4);
+                    random_y_x = fill_rand(random_y_x,i,j,g_b);
+                    if (random_y_x == 1) {
+                        test_destroy_y(random_y_x,g_b,i,j,i-2);
+                    } else if (random_y_x == 2) {
+                        test_destroy_x(random_y_x,g_b,i,j,j+2);
+                    } else if(random_y_x == 3) {
+                        test_destroy_y(random_y_x,g_b,i,j,i+2);
+                    } else if (random_y_x == 4) {
+                        test_destroy_x(random_y_x,g_b,i,j,j-2);
                     }
                 }
             }
         }
-        flag = verify_arrays(g_b,col_row);
+        flag = verify_arrays(g_b);
     }
 }
 
-void print_file_game_board(game_board *g_b, column_row* col_row){
-    g_b->name = strcat(g_b->name,".cfg");
-    FILE * file = fopen(g_b->name,"w");
+/**
+ * This function is writing into a file the actual game board
+ * @param g_b the structure of the game board
+ */
+void print_file_game_board(game_board *g_b) {
+    char * name_file = NULL;
+    name_file = malloc(strlen(g_b->name)+5);
+    name_file[0] = '\0';
+    strcat(name_file,g_b->name);
+    strcat(name_file,".cfg");
+    FILE * file = fopen(name_file,"w");
     int count = 0;
     if (file != NULL) {
-        //fprintf(file,"%d*%d\n",row,col);
-        for (int i = 0; i < col_row->row; ++i) {
-            for (int j = 0; j < col_row->col; ++j) {
-                if (g_b->game_board[i][j] == 0){
+        for (int i = 0; i < g_b->row; ++i) {
+            for (int j = 0; j < g_b->col; ++j) {
+                if (g_b->game_board[i][j] == WALL) {
                     fputc('#',file);
-                }else if (g_b->game_board[i][j] == 1){
+                } else if (g_b->game_board[i][j] == BLANK) {
                     fputc(' ',file);
-                }else if(g_b->game_board[i][j] == -1){
+                } else if(g_b->game_board[i][j] == PLAYER) {
                     fputc('o',file);
-                }else if(g_b->game_board[i][j] == -2){
+                } else if(g_b->game_board[i][j] == BONUS) {
                     fputc('+',file);
-                }else if(g_b->game_board[i][j] == -3){
+                } else if(g_b->game_board[i][j] == MALUS) {
                     fputc('X',file);
                 }
                 count++;
@@ -271,25 +351,29 @@ void print_file_game_board(game_board *g_b, column_row* col_row){
         }
         fclose(file);
     }
+    free(name_file);
 }
 
-
-void add_trap_and_treasure(game_board *g_b,column_row *col_row){
-    int number_trap_and_treasuer = (col_row->row*col_row->col)/30;
-    if (number_trap_and_treasuer != 0) {
+/**
+ * This function add the treasures and the trap into the game board
+ * @param g_b the structure of the game board we want to modify
+ */
+void add_trap_and_treasure(game_board *g_b) {
+    int number_trap_and_treasure = (g_b->row*g_b->col)/30;
+    if (number_trap_and_treasure != 0) {
         int random_case_row;
         int random_case_col;
         int flag;
-        for (int i = 1; i <= number_trap_and_treasuer; ++i) {
+        for (int i = 1; i <= number_trap_and_treasure; ++i) {
             flag = 0;
             while (flag == 0) {
-                random_case_row = rand_a_b(1, col_row->row - 1);
-                random_case_col = rand_a_b(1, col_row->col - 1);
-                if (g_b->game_board[random_case_row][random_case_col] == 1) {
+                random_case_row = rand_a_b(1, g_b->row - 1);
+                random_case_col = rand_a_b(1, g_b->col - 1);
+                if (g_b->game_board[random_case_row][random_case_col] == BLANK) {
                     if (i%2 == 0) {
-                        g_b->game_board[random_case_row][random_case_col] = -2;
-                    }else{
-                        g_b->game_board[random_case_row][random_case_col] = -3;
+                        g_b->game_board[random_case_row][random_case_col] = BONUS;
+                    } else {
+                        g_b->game_board[random_case_row][random_case_col] = MALUS;
                     }
                     flag = 1;
                 }
@@ -298,88 +382,107 @@ void add_trap_and_treasure(game_board *g_b,column_row *col_row){
     }
 }
 
-void create_labyrinthe(game_board *g_b, column_row *col_row){
+/**
+ * This function create the labyrinth from nothing
+ * @param game_board
+ */
+void create_labyrinthe(game_board *g_b) {
     int y;
     int x;
-    printf("Vous avez selectionne la creation de tableau.\n");
-    printf("Veuillez saisir un premier nombre IMPAIR qui sera votre hauteur : ");
+    printf("Make a labyrinth.\n");
+    printf("Please enter an odd number which will be the height of your labyrinth : ");
     y = enter_odd();
-    printf("Veuillez saisir un second nombre IMPAIR qui sera votre longueur : ");
+    printf("Please enter an odd number which will be the width of your labyrinth :");
     x = enter_odd();
 
-    col_row->col = x;
-    col_row->row = y;
+    g_b->col = x;
+    g_b->row = y;
 
-    g_b->game_board = calloc(col_row->row,sizeof(int*));
+    g_b->game_board = calloc(g_b->row,sizeof(int*));
     for (int i = 0; i < y; ++i) {
-        g_b->game_board[i] = calloc(col_row->col,sizeof(int));
+        g_b->game_board[i] = calloc(g_b->col,sizeof(int));
     }
-    init_game_board(g_b,col_row);
-    display_game_board(g_b,col_row);
+    init_game_board(g_b);
+    display_game_board(g_b);
 
-    destroy_walls(g_b,col_row);
-    add_trap_and_treasure(g_b,col_row);
+    destroy_walls(g_b);
+    add_trap_and_treasure(g_b);
 
-    display_game_board(g_b,col_row);
-    printf("Votre labyrinthe a ete cree\nVeuillez saisir un nom a votre labyrinthe : ");
+    display_game_board(g_b);
+    printf("Your labyrinth has been created\nPlease enter a name to your labyrinth : ");
     scanf("%s",g_b->name);
-    printf("dafuq?");
-    print_file_game_board(g_b,col_row);
+    print_file_game_board(g_b);
 }
 
-void load_labyrinthe(game_board *g_b,column_row *col_row){
-    FILE * file;
-    char * line = (char*) malloc(sizeof(char));
-    printf("Veuillez saisir la localisation de votre fichier : ");
-    scanf("%s",g_b->name);
-    file = fopen(g_b->name,"r");
-
-    col_row->row = 0;
-    col_row->col = 0;
+/**
+ * This function initiate the columns and the rows loaded in the game board
+ * @param g_b structure game board in which we are working on
+ * @param f the file which contains the file on which we are working on
+ */
+void init_col_row_load_gameboard(game_board *g_b, FILE * f) {
     int c;
-    if (file != NULL){
-        while((c = fgetc(file))!= EOF){
-            if (c == '\n'){
-                col_row->row++;
-            }else if(col_row->row == 0){
-                col_row->col++;
-            }
+    while ((c = fgetc(f))!= EOF) {
+        if (c == '\n') {
+            g_b->row++;
+        } else if(g_b->row == 0) {
+            g_b->col++;
         }
-        printf("%d by %d\n",col_row->row,col_row->col);
-        fseek(file,0,0);
+    }
+    fseek(f,0,0);
 
-        g_b->game_board = calloc(col_row->row,sizeof(int*));
-        for (int i = 0; i < col_row->col; ++i) {
-            g_b->game_board[i] = calloc(col_row->col,sizeof(int));
+    g_b->game_board = calloc(g_b->row,sizeof(int*));
+    for (int i = 0; i < g_b->col; ++i) {
+        g_b->game_board[i] = calloc(g_b->col,sizeof(int));
+    }
+    int i = 0;
+    int j = 0;
+    while ((c = fgetc(f))!= EOF) {
+        if (c == '#') {
+            g_b->game_board[i][j] = WALL;
+            j++;
+        } else if (c == ' ') {
+            g_b->game_board[i][j] = BLANK;
+            j++;
+        } else if(c == 'o') {
+            g_b->game_board[i][j] = PLAYER;
+            j++;
+        } else if(c == '+') {
+            g_b->game_board[i][j] = BONUS;
+            j++;
+        } else if(c == 'X') {
+            g_b->game_board[i][j] = MALUS;
+            j++;
+        } else if(c == '\n') {
+            i++;
+            j = 0;
         }
-        int i = 0;
-        int j = 0;
-        while ((c = fgetc(file))!= EOF){
-            if (c == '#'){
-                g_b->game_board[i][j] = 0;
-                j++;
-            }else if (c == ' '){
-                g_b->game_board[i][j] = 1;
-                j++;
-            }else if(c == 'o'){
-                g_b->game_board[i][j] = -1;
-                j++;
-            }else if(c == '+') {
-                g_b->game_board[i][j] = -2;
-                j++;
-            }else if(c == 'X'){
-                g_b->game_board[i][j] = -3;
-                j++;
-            }
-            else if(c == '\n'){
-                i++;
-                j = 0;
-            }
-        }
-        display_game_board(g_b,col_row);
+    }
+}
+
+/**
+ * This function load a labyrinth from a file .cfg
+ * @param g_b the structure of the game board
+ */
+void load_labyrinthe(game_board *g_b) {
+    FILE * file;
+    char * line = malloc(sizeof(char*));
+    char * name_file = NULL;
+    name_file = malloc(strlen(g_b->name)+5);
+    name_file[0] = '\0';
+    strcat(name_file,g_b->name);
+    strcat(name_file,".cfg");
+    file = fopen(name_file,"r");
+    g_b->row = 0;
+    g_b->col = 0;
+    if (file != NULL) {
+        init_col_row_load_gameboard(g_b,file);
+        printf("Game loaded\n");
         fclose(file);
-    }else{
-        printf("Le fichier %s selectionné est introuvable",g_b->name);
+    } else {
+        printf("The file %s selected doesn't exit", g_b->name);
     }
     free(line);
+    free(name_file);
 }
+
+
